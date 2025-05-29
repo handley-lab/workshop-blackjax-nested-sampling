@@ -49,7 +49,7 @@ git clone https://github.com/handley-lab/workshop-blackjax-nested-sampling.git
 cd workshop-blackjax-nested-sampling
 
 # Install dependencies
-pip install git+https://github.com/handley-lab/blackjax@nested_sampling
+pip install git+https://github.com/handley-lab/blackjax
 pip install anesthetic tqdm matplotlib jupyter
 
 # Launch the notebook
