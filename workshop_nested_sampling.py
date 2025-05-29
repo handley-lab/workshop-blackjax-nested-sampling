@@ -25,9 +25,6 @@ from anesthetic import NestedSamples
 # | We start with the classic problem of fitting a linear model y = mx + c to noisy data.
 # | This introduces the basic nested sampling workflow in BlackJAX.
 
-print("=" * 60)
-print("PART 1: BAYESIAN LINEAR REGRESSION")
-print("=" * 60)
 
 # | ### 1.1 Nested Sampling Configuration
 # | 
@@ -143,9 +140,6 @@ plt.suptitle("Line Fitting: Posterior Distributions")
 # | Now we tackle a more complex problem: inferring the parameters of a 2D Gaussian distribution
 # | including the correlation coefficient. This demonstrates parameter transforms and constrained sampling.
 
-print("\n" + "=" * 60)
-print("PART 2: 2D GAUSSIAN PARAMETER INFERENCE")
-print("=" * 60)
 
 # | ### 2.1 Define 2D Gaussian Parameters
 true.update({
@@ -282,10 +276,6 @@ plt.suptitle("2D Gaussian: Posterior Parameter Estimates")
 # | Compare BlackJAX nested sampling with NUTS (No-U-Turn Sampler) and 
 # | Affine Invariant Ensemble Sampler on the line fitting problem
 
-print("\n" + "=" * 60)
-print("PART 3: PERFORMANCE COMPARISON")
-print("=" * 60)
-
 import time
 
 # | ### 3.1 Define NUTS Log-Probability Function
@@ -341,10 +331,6 @@ print(f"NUTS runtime: {nuts_time:.2f} seconds")
 print(f"NUTS means: m={nuts_m[500:].mean():.2f}, c={nuts_c[500:].mean():.2f}, σ={nuts_sigma[500:].mean():.2f}")
 
 # | ### 3.4 Performance Summary and Visualization
-print("\n" + "=" * 50)
-print("PERFORMANCE SUMMARY")
-print("=" * 50)
-
 methods = ["Nested Sampling", "NUTS"]
 times = [f"{ns_time:.1f} sec", f"{nuts_time:.1f} sec"]
 evidence = ["✓ (Log Z available)", "✗ (Not computed)"]
@@ -405,7 +391,3 @@ plt.suptitle("Posterior Comparison: Nested Sampling vs NUTS", y=1.02)
 # | - Comparing with other BlackJAX samplers (HMC, NUTS, etc.)
 # | - Exploring nested sampling for model selection problems
 
-print("\n" + "=" * 60)
-print("WORKSHOP COMPLETE!")
-print("Try BlackJAX nested sampling on your own problems!")
-print("=" * 60)
