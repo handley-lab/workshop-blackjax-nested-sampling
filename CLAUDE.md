@@ -185,3 +185,24 @@ python -m venv workshop_env
 source workshop_env/bin/activate
 pip install git+https://github.com/handley-lab/blackjax anesthetic tqdm jupyter matplotlib-inline
 ```
+
+### 🚨 CRITICAL WORKFLOW REMINDER
+
+**EVERY TIME you update the workshop content, you MUST maintain both notebook versions:**
+
+1. **Edit the Python script** (`workshop_nested_sampling.py`) as the source of truth
+2. **Update the clean notebook** using py2nb conversion OR manual editing
+3. **ALWAYS ensure the clean notebook has**:
+   - Executable `!pip install` cell as the second cell
+   - Helpful installation note explaining Colab timing
+   - `%matplotlib inline` configuration in imports
+   - Combined plotting cells (no split figure creation/plotting)
+4. **Re-execute the executed notebook** for GitHub preview
+5. **Fix execution_count fields** using the fix script
+6. **Test both versions** before committing
+
+**Helper Scripts Available**:
+- `fix_notebook_complete.py` - Adds execution_count and cell IDs
+- `execute_notebook.py` - Executes notebook with proper matplotlib backend
+
+**Failure to maintain both versions breaks the user experience!**
