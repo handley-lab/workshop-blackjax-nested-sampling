@@ -120,3 +120,68 @@ jax.config.update('jax_num_cpu_devices', 8)  # Multi-core
 - **Recommended settings**: 100 live points, num_delete=50 for workshop timing
 - **Educational progression**: Line fitting → 2D Gaussian → Performance comparison
 - **Error handling**: Proper covariance matrix validation and parameter transforms
+
+## Notebook Execution and Display
+
+### Critical Learnings for GitHub Display
+
+**Essential Requirements:**
+- All code cells MUST have `execution_count` fields (required by GitHub's notebook renderer)
+- All cells MUST have unique `id` fields to prevent validation warnings
+- For embedded plots, use `matplotlib_inline.backend_inline` backend (not `Agg`)
+
+**Execution Process:**
+```bash
+# 1. Install handley-lab BlackJAX (has nested sampling functionality)
+pip install git+https://github.com/handley-lab/blackjax
+
+# 2. Execute with proper matplotlib backend for inline display
+MPLBACKEND=module://matplotlib_inline.backend_inline jupyter nbconvert --to notebook --execute --inplace notebook.ipynb
+```
+
+**Key Matplotlib Configuration:**
+```python
+# In notebook cells - essential for proper plot embedding
+%matplotlib inline
+plt.style.use('default')  # Ensure consistent styling
+```
+
+### Common Pitfalls and Solutions
+
+**Problem**: Plots don't embed in executed notebook
+- **Cause**: Using `MPLBACKEND=Agg` which saves to memory but doesn't display inline
+- **Solution**: Use `matplotlib_inline.backend_inline` backend
+
+**Problem**: "Invalid Notebook 'execution_count' is a required property" error
+- **Cause**: Missing execution_count fields in code cells
+- **Solution**: Run notebook validation fix script to add required metadata
+
+**Problem**: Split visualization cells show empty plots
+- **Cause**: Figure creation and plotting commands in separate cells
+- **Solution**: Combine all related plotting code in single cells
+
+### Validation Fix Script Pattern
+```python
+import json
+import uuid
+
+# Add execution_count and cell IDs
+with open('notebook.ipynb', 'r') as f:
+    notebook = json.load(f)
+
+execution_count = 1
+for cell in notebook['cells']:
+    if 'id' not in cell:
+        cell['id'] = str(uuid.uuid4())[:8]
+    if cell['cell_type'] == 'code':
+        cell['execution_count'] = execution_count
+        execution_count += 1
+```
+
+### Execution Environment Setup
+```bash
+# Create virtual environment with proper dependencies
+python -m venv workshop_env
+source workshop_env/bin/activate
+pip install git+https://github.com/handley-lab/blackjax anesthetic tqdm jupyter matplotlib-inline
+```
