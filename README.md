@@ -1,6 +1,6 @@
 # BlackJAX Nested Sampling Workshop
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/handley-lab/workshop-blackjax-nested-sampling/blob/main/blackjax_nested_sampling_workshop.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/handley-lab/workshop-blackjax-nested-sampling/blob/master/blackjax_nested_sampling_workshop.ipynb)
 
 ## GPU-Native Nested Sampling for Modern Simulation-Based Inference
 
