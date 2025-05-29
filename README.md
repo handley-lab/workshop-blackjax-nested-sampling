@@ -42,7 +42,7 @@ git clone https://github.com/handley-lab/workshop-blackjax-nested-sampling.git
 cd workshop-blackjax-nested-sampling
 
 # Install dependencies
-pip install git+https://github.com/handley-lab/blackjax@nested_sampling
+pip install git+https://github.com/handley-lab/blackjax
 pip install anesthetic matplotlib corner tqdm jupyter
 
 # Launch Jupyter
@@ -61,7 +61,7 @@ pip install jax jaxlib  # CPU version
 # pip install jax[cuda12_pip]  # GPU version (if CUDA available)
 
 # Install BlackJAX and visualization tools
-pip install git+https://github.com/handley-lab/blackjax@nested_sampling
+pip install git+https://github.com/handley-lab/blackjax
 pip install anesthetic matplotlib corner tqdm jupyter
 
 # Run workshop
