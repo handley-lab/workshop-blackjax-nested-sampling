@@ -2,6 +2,10 @@
 
 **GPU-Native Bayesian Inference with JAX and BlackJAX**
 
+📖 **Essential Reading**: For the authoritative reference on nested sampling theory and applications, see the [Nested Sampling Book](https://handley-lab.co.uk/nested-sampling-book) by Will Handley.
+
+> *"Nested sampling is a Bayesian computational technique that solves the key problem of evidence evaluation"* — from the [Nested Sampling Book](https://handley-lab.co.uk/nested-sampling-book)
+
 ## 🚀 Workshop Notebooks
 
 ### Interactive Workshop (Clean)
