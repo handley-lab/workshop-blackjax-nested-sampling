@@ -39,6 +39,15 @@ You will need to synthesize information from the following `prompt-materials/` a
         *   Nested sampling source files: `blackjax/ns/`, `blackjax/mcmc/ss/`
         *   Example script: `line.py` (fitting a straight line with BlackJAX NS).
         *   Example script: `nsmcmc.py` (implementing a custom NS algorithm).
+        *   Example script: `docs/examples/nested_sampling.py` (advanced usage patterns).
+
+6.  **`prompt-materials/anesthetic/` (Anesthetic Library Documentation):**
+    *   **Content:** Complete anesthetic library documentation and examples.
+    *   **Your Task:** Use these materials to understand proper nested sampling post-processing:
+        *   `docs/source/plotting.rst`: Comprehensive plotting guide with API examples
+        *   `anesthetic/examples/perfect_ns.py`: Perfect nested sampling generators and patterns
+        *   `tests/test_examples.py`: Real-world usage examples and API patterns
+        *   Key patterns: `NestedSamples` class, `plot_2d()` methods, evidence computation
 
 **Deliverables We Will Create Together:**
 
@@ -69,9 +78,19 @@ You will need to synthesize information from the following `prompt-materials/` a
 **Core Ideas/Tasks for the Workshop:**
 
 *   Demonstrate how to run nested sampling using BlackJAX.
-*   Show how to use `anesthetic` for visualizing results.
-*   Guide users through comparing Nested Sampling (NS) with an Affine Invariant Ensemble Sampler (AIES) like `emcee` (or a BlackJAX equivalent if available) on a simple problem.
+*   Show how to use `anesthetic` for visualizing results and proper post-processing.
+*   Guide users through comparing Nested Sampling (NS) with NUTS and Affine Invariant Ensemble Sampler (AIES) on a simple problem.
+*   Educational progression: Line fitting → 2D Gaussian parameter inference → Performance comparison
 *   Encourage attendees to try the BlackJAX NS implementation with their own JAX code, potentially building on Viraj Pandya's JAX/SciML workshop material.
+
+**Workshop Implementation Notes (from Development):**
+
+*   **Performance Configuration**: Use 100 live points and num_delete=50 for optimal workshop timing
+*   **Anesthetic Integration**: Use `NestedSamples` class with `plot_2d()` methods for proper visualization
+*   **Error Handling**: Include proper covariance matrix validation and parameter transform examples
+*   **API Patterns**: Demonstrate `samples.logZ()` and `samples.logZ(nsamples).std()` for evidence computation
+*   **Transform Functions**: Show proper arctanh/tanh transforms for constrained parameters (e.g., correlation coefficient)
+*   **Educational Structure**: Start simple (line fitting) then build complexity (multivariate parameter inference)
 
 **Initial Request & How to Proceed:**
 

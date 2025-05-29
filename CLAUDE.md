@@ -86,10 +86,27 @@ jax.config.update('jax_num_cpu_devices', 8)  # Multi-core
 
 ## Reference Materials
 
+### Primary Documentation
 - **BlackJAX repository**: https://github.com/handley-lab/blackjax
 - **Anesthetic documentation**: https://anesthetic.readthedocs.io/en/latest/plotting.html
+- **JAX documentation**: https://jax.readthedocs.io/
+
+### Workshop-Specific Materials
+- **`prompt-materials/blackjax/`**: BlackJAX examples and patterns
+  - `line.py`: Reference implementation for line fitting with proper anesthetic integration
+  - `docs/examples/nested_sampling.py`: Advanced nested sampling examples
+- **`prompt-materials/anesthetic/`**: Anesthetic library documentation and examples
+  - `docs/source/plotting.rst`: Comprehensive plotting guide
+  - `anesthetic/examples/perfect_ns.py`: Perfect nested sampling generators
+  - `tests/test_examples.py`: Usage examples and API patterns
 - **Previous talks** (in `prompt-materials/talks/`): Source material for adapted content
 - **Workshop context** (in `prompt-materials/`): SBI, JAX, and ILI reference materials
+
+### Key API Patterns Learned
+- **NestedSamples class**: Proper post-processing of BlackJAX results
+- **Evidence computation**: `samples.logZ()` and `samples.logZ(nsamples).std()`
+- **Anesthetic plotting**: `plot_2d()` with kinds parameter for visualization
+- **Transform functions**: Proper arctanh/tanh transforms for constrained parameters
 
 ## Workshop Development Notes
 
@@ -98,3 +115,8 @@ jax.config.update('jax_num_cpu_devices', 8)  # Multi-core
 - Duration: 1 hour total (15-min talk + 45-min hands-on)
 - Key comparison: BlackJAX nested sampling vs. existing tools (dynesty, emcee)
 - Integration opportunity: Build on Viraj Pandya's JAX/SciML workshop content
+
+### Performance Configuration
+- **Recommended settings**: 100 live points, num_delete=50 for workshop timing
+- **Educational progression**: Line fitting → 2D Gaussian → Performance comparison
+- **Error handling**: Proper covariance matrix validation and parameter transforms
