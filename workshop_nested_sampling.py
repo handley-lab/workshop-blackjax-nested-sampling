@@ -1139,8 +1139,10 @@ for i, param_name in enumerate(param_names_sbi):
     print(f"  {param_name}: {sbi_mean_error[i]:.4f}")
 
 print(f"\nComparison with Nested Sampling:")
-print(f"NS average time per inference: {jnp.mean([r['ns_time'] for r in comparison_results]):.2f} seconds")
-print(f"SBI advantage: ~{jnp.mean([r['ns_time'] for r in comparison_results])/0.001:.0f}x faster inference")
+ns_times = [r['ns_time'] for r in comparison_results]
+avg_ns_time = sum(ns_times) / len(ns_times)  # Use Python mean instead of jnp.mean
+print(f"NS average time per inference: {avg_ns_time:.2f} seconds")
+print(f"SBI advantage: ~{avg_ns_time/0.001:.0f}x faster inference")
 
 print(f"\nSBI Trade-offs:")
 print(f"✓ Extremely fast inference once trained")
