@@ -32,13 +32,13 @@ This workshop introduces **BlackJAX nested sampling** - a modern, GPU-accelerate
 
 Click the badge below to run the workshop in Google Colab with zero setup:
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/[username]/workshop-blackjax-nested-sampling/blob/master/blackjax_nested_sampling_workshop.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/handley-lab/workshop-blackjax-nested-sampling/blob/master/blackjax_nested_sampling_workshop.ipynb)
 
 ### Option 2: Local Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/[username]/workshop-blackjax-nested-sampling.git
+git clone https://github.com/handley-lab/workshop-blackjax-nested-sampling.git
 cd workshop-blackjax-nested-sampling
 
 # Install dependencies
