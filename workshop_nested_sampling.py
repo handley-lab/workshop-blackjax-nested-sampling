@@ -14,8 +14,6 @@ jax.config.update("jax_enable_x64", True)
 
 import jax.numpy as jnp
 import numpy as np
-import matplotlib
-matplotlib.use('Agg')  # Use non-interactive backend
 import matplotlib.pyplot as plt
 import tqdm
 import time
@@ -60,9 +58,7 @@ ax.set_xlabel("x")
 ax.set_ylabel("y")
 ax.legend()
 ax.set_title("Linear Model: Bayesian Parameter Estimation")
-plt.savefig("line_data.png", dpi=150, bbox_inches='tight')
-plt.close()
-print("Saved plot: line_data.png")
+plt.show()
 
 # | ### 1.3 Define Likelihood Function
 # |
@@ -141,11 +137,8 @@ print(f"Posterior means: m={line_samples.m.mean():.2f}, c={line_samples.c.mean()
 kinds = {'lower': 'kde_2d', 'diagonal': 'hist_1d', 'upper': 'scatter_2d'}
 axes = line_samples.plot_2d(columns, kinds=kinds, label='Posterior')
 axes.axlines(true, color='red', linestyle='--', alpha=0.8)
-
 plt.suptitle("Line Fitting: Posterior Distributions")
-plt.savefig("line_posterior.png", dpi=150, bbox_inches='tight')
-plt.close()
-print("Saved plot: line_posterior.png")
+plt.show()
 
 # | ## Part 2: 2D Gaussian Parameter Inference
 # |
@@ -185,9 +178,7 @@ ax.set_xlabel(r"$x_1$")
 ax.set_ylabel(r"$x_2$")
 ax.set_title("2D Gaussian Data")
 ax.grid(True, alpha=0.3)
-plt.savefig("gaussian_data.png", dpi=150, bbox_inches='tight')
-plt.close()
-print("Saved plot: gaussian_data.png")
+plt.show()
 
 # | ### 2.4 Define Likelihood with Parameter Transforms
 # |
@@ -284,15 +275,11 @@ print(f"Posterior means: μ₁={gaussian_samples.mu1.mean():.2f}, μ₂={gaussia
 key_params = ["mu1", "mu2", "sigma1", "sigma2", "rho"]
 axes = gaussian_samples[key_params].plot_2d(key_params, kinds={'diagonal': 'hist_1d', 'lower': 'kde_2d'})
 
-# | Mark true values using anesthetic's axlines method
-# | Extract only the 2D Gaussian parameters from the true dict
+# Mark true values using anesthetic's axlines method
 true_2d = {k: true[k] for k in key_params}
 axes.axlines(true_2d, color='red', linestyle='--', alpha=0.8)
-
 plt.suptitle("2D Gaussian: Posterior Parameter Estimates")
-plt.savefig("gaussian_posterior.png", dpi=150, bbox_inches='tight')
-plt.close()
-print("Saved plot: gaussian_posterior.png")
+plt.show()
 
 # | ## Part 3: Performance Comparison
 # |
@@ -405,9 +392,7 @@ axes[2].legend()
 
 plt.tight_layout()
 plt.suptitle("Posterior Comparison: Nested Sampling vs NUTS", y=1.02)
-plt.savefig("sampler_comparison.png", dpi=150, bbox_inches='tight')
-plt.close()
-print("Saved plot: sampler_comparison.png")
+plt.show()
 
 # | ## Workshop Conclusions
 # |
