@@ -74,7 +74,7 @@ def line_loglikelihood(params):
     # Vectorized normal log-likelihood
     return jax.scipy.stats.multivariate_normal.logpdf(y, y_model, sigma**2)
 
-# | ### 1.4 Set Up Priors and Run Nested Sampling
+# | ### 1.4 Define Prior Distributions
 prior_bounds = {
     "m": (-5.0, 5.0),      # slope
     "c": (-5.0, 5.0),      # intercept  
@@ -84,7 +84,7 @@ prior_bounds = {
 num_dims = len(prior_bounds)
 num_inner_steps = num_dims * 5
 
-# | Initialize uniform priors and nested sampler
+# | ### 1.5 Initialize Nested Sampler
 rng_key, prior_key = jax.random.split(rng_key)
 particles, logprior_fn = blackjax.ns.utils.uniform_prior(prior_key, num_live, prior_bounds)
 
@@ -94,12 +94,14 @@ nested_sampler = blackjax.nss(
     num_delete=num_delete,
     num_inner_steps=num_inner_steps,
 )
+print(f"Initialized nested sampler with {num_live} live points")
 
-# | JIT compile for performance
+# | ### 1.6 JIT Compile for Performance
 init_fn = jax.jit(nested_sampler.init)
 step_fn = jax.jit(nested_sampler.step)
+print("Functions compiled - ready to run!")
 
-# | Run the nested sampling
+# | ### 1.7 Run the Nested Sampling
 print("Running nested sampling for line fitting...")
 ns_start = time.time()
 live = init_fn(particles)
@@ -115,7 +117,7 @@ with tqdm.tqdm(desc="Dead points", unit=" dead points") as pbar:
 dead = blackjax.ns.utils.finalise(live, dead)
 ns_time = time.time() - ns_start
 
-# | ### 1.5 Process Results with Anesthetic
+# | ### 1.8 Process Results with Anesthetic
 columns = ["m", "c", "sigma"]
 labels = [r"$m$", r"$c$", r"$\sigma$"]
 data = jnp.vstack([dead.particles[key] for key in columns]).T
@@ -129,17 +131,15 @@ line_samples = NestedSamples(
     logzero=jnp.nan,
 )
 
-# | Evidence and parameter estimates
+# | ### 1.9 Results Analysis and Visualization
 print(f"Nested sampling runtime: {ns_time:.2f} seconds")
 print(f"Log Evidence: {line_samples.logZ():.2f} ± {line_samples.logZ(100).std():.2f}")
 print(f"True parameters: m={true['m']}, c={true['c']}, σ={true['sigma']}")
 print(f"Posterior means: m={line_samples.m.mean():.2f}, c={line_samples.c.mean():.2f}, σ={line_samples.sigma.mean():.2f}")
 
-# | Posterior visualization with true values
+# Create posterior corner plot with true values marked
 kinds = {'lower': 'kde_2d', 'diagonal': 'hist_1d', 'upper': 'scatter_2d'}
 axes = line_samples.plot_2d(columns, kinds=kinds, label='Posterior')
-
-# | Mark true values using anesthetic's axlines method
 axes.axlines(true, color='red', linestyle='--', alpha=0.8)
 
 plt.suptitle("Line Fitting: Posterior Distributions")
@@ -156,15 +156,15 @@ print("\n" + "=" * 60)
 print("PART 2: 2D GAUSSIAN PARAMETER INFERENCE")
 print("=" * 60)
 
-# | ### 2.1 Generate 2D Gaussian Data
-# | Update true values dictionary for 2D Gaussian parameters
+# | ### 2.1 Define 2D Gaussian Parameters
 true.update({
     'mu1': 1.0, 'mu2': -0.5,
     'sigma1': 1.2, 'sigma2': 0.8, 
     'rho': 0.6
 })
+print("True parameters:", {k: v for k, v in true.items() if k in ['mu1', 'mu2', 'sigma1', 'sigma2', 'rho']})
 
-# | Construct covariance matrix
+# | ### 2.2 Generate Correlated 2D Data
 true_mu = jnp.array([true['mu1'], true['mu2']])
 true_cov = jnp.array([
     [true['sigma1']**2, true['rho'] * true['sigma1'] * true['sigma2']],
@@ -175,7 +175,10 @@ num_samples = 200
 key, rng_key = jax.random.split(rng_key)
 gaussian_data = jax.random.multivariate_normal(key, true_mu, true_cov, (num_samples,))
 
-# | Visualize the 2D data
+print(f"Generated {num_samples} correlated 2D samples")
+print(f"Sample mean: [{gaussian_data.mean(0)[0]:.2f}, {gaussian_data.mean(0)[1]:.2f}]")
+
+# | ### 2.3 Visualize the 2D Data
 fig, ax = plt.subplots(figsize=(8, 6))
 ax.scatter(gaussian_data[:, 0], gaussian_data[:, 1], alpha=0.6, s=20)
 ax.set_xlabel(r"$x_1$")
@@ -186,7 +189,7 @@ plt.savefig("gaussian_data.png", dpi=150, bbox_inches='tight')
 plt.close()
 print("Saved plot: gaussian_data.png")
 
-# | ### 2.2 Define Likelihood with Parameter Transforms
+# | ### 2.4 Define Likelihood with Parameter Transforms
 # |
 # | We use arctanh/tanh transform for the correlation coefficient to enforce |ρ| < 1
 def gaussian_2d_loglikelihood(params):
@@ -217,7 +220,7 @@ def gaussian_2d_loglikelihood(params):
     
     return jax.lax.cond(det > 1e-8, valid_loglik, invalid_loglik)
 
-# | ### 2.3 Set Up Priors for 2D Gaussian
+# | ### 2.5 Set Up Priors for 2D Gaussian
 gaussian_prior_bounds = {
     "mu1": (-3.0, 5.0),
     "mu2": (-3.0, 3.0), 
@@ -229,7 +232,7 @@ gaussian_prior_bounds = {
 num_dims_2d = len(gaussian_prior_bounds)
 num_inner_steps_2d = num_dims_2d * 5
 
-# | Initialize and run nested sampling
+# | ### 2.6 Initialize and Run Nested Sampling
 rng_key, prior_key = jax.random.split(rng_key)
 particles_2d, logprior_fn_2d = blackjax.ns.utils.uniform_prior(prior_key, num_live, gaussian_prior_bounds)
 
@@ -256,7 +259,7 @@ with tqdm.tqdm(desc="Dead points", unit=" dead points") as pbar:
 
 dead_2d = blackjax.ns.utils.finalise(live_2d, dead_2d)
 
-# | ### 2.4 Transform Back and Analyze Results
+# | ### 2.7 Transform Back and Analyze Results
 columns_2d = ["mu1", "mu2", "sigma1", "sigma2", "rho_t"]
 labels_2d = [r"$\mu_1$", r"$\mu_2$", r"$\sigma_1$", r"$\sigma_2$", r"$\rho_t$"]
 data_2d = jnp.vstack([dead_2d.particles[key] for key in columns_2d]).T
@@ -302,10 +305,7 @@ print("=" * 60)
 
 import time
 
-# | ### 3.1 NUTS (Hamiltonian Monte Carlo)
-print("Running NUTS sampler...")
-
-# | NUTS requires log probability function (log prior + log likelihood)
+# | ### 3.1 Define NUTS Log-Probability Function
 def nuts_logprob(params_array):
     """Combined log probability for NUTS (assumes flat priors within bounds)."""
     m, c, log_sigma = params_array
@@ -319,30 +319,23 @@ def nuts_logprob(params_array):
     def valid_logprob():
         y_model = m * x + c
         loglik = jax.scipy.stats.multivariate_normal.logpdf(y, y_model, sigma**2)
-        # Add Jacobian for log transform: log|d(exp(log_sigma))/d(log_sigma)| = log_sigma
-        return loglik + log_sigma
+        return loglik + log_sigma  # Add Jacobian for log transform
     
     def invalid_logprob():
         return -jnp.inf
     
-    return jax.lax.cond(
-        m_valid & c_valid & sigma_valid,
-        valid_logprob,
-        invalid_logprob
-    )
+    return jax.lax.cond(m_valid & c_valid & sigma_valid, valid_logprob, invalid_logprob)
 
-# | Initialize NUTS with step size and mass matrix
+# | ### 3.2 Initialize and Run NUTS Sampler
 initial_position = jnp.array([1.0, 0.0, jnp.log(1.0)])  # [m, c, log_sigma]
-step_size = 0.1
-inverse_mass_matrix = jnp.eye(3)
-
-nuts = blackjax.nuts(nuts_logprob, step_size, inverse_mass_matrix)
+nuts = blackjax.nuts(nuts_logprob, step_size=0.1, inverse_mass_matrix=jnp.eye(3))
 
 rng_key, nuts_key = jax.random.split(rng_key)
 nuts_state = nuts.init(initial_position)
 nuts_step = jax.jit(nuts.step)
 
-# | Run NUTS sampling
+print("Running NUTS sampler...")
+
 num_nuts_samples = 2000
 nuts_start = time.time()
 nuts_samples = []
@@ -356,7 +349,7 @@ for i in tqdm.tqdm(range(num_nuts_samples), desc="NUTS"):
 nuts_time = time.time() - nuts_start
 nuts_samples = jnp.stack(nuts_samples)
 
-# | Transform NUTS samples back to original space
+# | ### 3.3 Process NUTS Results  
 nuts_m = nuts_samples[:, 0]
 nuts_c = nuts_samples[:, 1] 
 nuts_sigma = jnp.exp(nuts_samples[:, 2])
@@ -364,7 +357,7 @@ nuts_sigma = jnp.exp(nuts_samples[:, 2])
 print(f"NUTS runtime: {nuts_time:.2f} seconds")
 print(f"NUTS means: m={nuts_m[500:].mean():.2f}, c={nuts_c[500:].mean():.2f}, σ={nuts_sigma[500:].mean():.2f}")
 
-# | ### 3.2 Performance Summary and Visualization
+# | ### 3.4 Performance Summary and Visualization
 print("\n" + "=" * 50)
 print("PERFORMANCE SUMMARY")
 print("=" * 50)
@@ -379,7 +372,7 @@ print("-" * 65)
 for i in range(len(methods)):
     print(f"{methods[i]:<20} {times[i]:<15} {evidence[i]:<15} {parallelization[i]}")
 
-# | ### 3.3 Posterior Comparison Plot
+# | ### 3.5 Posterior Comparison Plot
 fig, axes = plt.subplots(1, 3, figsize=(15, 4))
 
 # | Generate proper posterior samples from NestedSamples (not raw dead points)
