@@ -29,7 +29,7 @@ Click the "Open in Colab" badge above to run the workshop directly in your brows
 ```bash
 git clone https://github.com/handley-lab/workshop-blackjax-nested-sampling.git
 cd workshop-blackjax-nested-sampling
-pip install blackjax[all] anesthetic emcee corner jupyter
+pip install git+https://github.com/handley-lab/blackjax.git anesthetic emcee corner jupyter
 jupyter notebook blackjax_nested_sampling_workshop.ipynb
 ```
 
