@@ -2,7 +2,19 @@
 
 **GPU-Native Bayesian Inference with JAX and BlackJAX**
 
+## 🚀 Workshop Notebooks
+
+### Interactive Workshop (Clean)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/handley-lab/workshop-blackjax-nested-sampling/blob/master/workshop_nested_sampling.ipynb)
+
+**👆 Click here to run the workshop interactively in Google Colab**
+
+### Preview with Results (Executed)
+[![View on GitHub](https://img.shields.io/badge/view-GitHub-blue?logo=github)](https://github.com/handley-lab/workshop-blackjax-nested-sampling/blob/master/workshop_nested_sampling_executed.ipynb)
+
+**👆 Click here to preview the workshop with all plots and outputs**
+
+---
 
 This interactive workshop demonstrates modern nested sampling using BlackJAX, a GPU-native probabilistic programming library built on JAX. Learn how to leverage automatic differentiation and JIT compilation for high-performance Bayesian inference.
 
@@ -39,10 +51,13 @@ This interactive workshop demonstrates modern nested sampling using BlackJAX, a 
 
 ## 🚀 Quick Start
 
-### Option 1: Google Colab (Recommended)
-Click the "Open in Colab" badge above to run the workshop instantly in your browser. No installation required!
+### Option 1: Interactive Workshop in Google Colab (Recommended)
+Click the **"Open in Colab"** badge above to run the clean, interactive workshop in your browser. No installation required!
 
-### Option 2: Local Installation
+### Option 2: Preview with Results
+Click the **"View on GitHub"** badge to see the workshop with all plots and outputs pre-executed for quick reference.
+
+### Option 3: Local Installation
 ```bash
 # Clone the repository
 git clone https://github.com/handley-lab/workshop-blackjax-nested-sampling.git
@@ -52,11 +67,14 @@ cd workshop-blackjax-nested-sampling
 pip install git+https://github.com/handley-lab/blackjax
 pip install anesthetic tqdm matplotlib jupyter
 
-# Launch the notebook
+# Launch the notebook (clean version)
 jupyter notebook workshop_nested_sampling.ipynb
+
+# Or view the executed version with plots
+jupyter notebook workshop_nested_sampling_executed.ipynb
 ```
 
-### Option 3: Run Python Script
+### Option 4: Run Python Script
 ```bash
 # Run the standalone Python script
 python workshop_nested_sampling.py
