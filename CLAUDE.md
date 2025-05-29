@@ -21,12 +21,18 @@ This repository contains materials for a workshop on nested sampling in BlackJAX
 
 ### Key Dependencies & Frameworks
 
+**Core Workshop:**
 - **JAX**: Primary computational framework (autodiff + JIT compilation)
 - **BlackJAX**: MCMC and nested sampling library
 - **Anesthetic**: Visualization library for nested sampling results
 - **NumPy/SciPy**: Core scientific computing
 - **Matplotlib**: Plotting and visualization
 - **Jupyter**: Interactive notebook environment
+
+**Advanced Extensions (Optional):**
+- **Optax**: Gradient-based optimization library (Part 5)
+- **Flax**: Neural networks for SBI (Part 6)
+- Additional JAX ecosystem packages
 
 ### Workshop Content Structure
 
@@ -35,10 +41,15 @@ This repository contains materials for a workshop on nested sampling in BlackJAX
 - Contrast BlackJAX (GPU-native, open-source) with legacy implementations
 - Emphasize JAX's dual strengths: autodiff + JIT compilation
 
-**Workshop Component** (~45 minutes):
-- Hands-on nested sampling with BlackJAX
-- Anesthetic visualization workflows
-- Performance comparison: nested sampling vs. affine invariant ensemble sampling
+**Core Workshop** (20 minutes):
+- Part 1: Line fitting with nested sampling (5 min)
+- Part 2: 2D Gaussian parameter inference (5 min)
+- Part 3: Performance comparison with NUTS (10 min)
+
+**Advanced Extensions** (90 minutes optional):
+- Part 4: Custom nested sampler implementation (30 min)
+- Part 5: JAX ecosystem integration with gradient descent (30 min)
+- Part 6: Simulation-based inference with neural networks (30 min)
 
 ## Development Commands
 
@@ -112,14 +123,23 @@ jax.config.update('jax_num_cpu_devices', 8)  # Multi-core
 
 - Target audience: Researchers familiar with JAX and SBI concepts
 - Delivery platform: Google Colab (minimize installation friction)
-- Duration: 1 hour total (15-min talk + 45-min hands-on)
+- Flexible duration: 20 minutes (core) to 110 minutes (full)
+- Modular structure: Core concepts + optional advanced extensions
 - Key comparison: BlackJAX nested sampling vs. existing tools (dynesty, emcee)
 - Integration opportunity: Build on Viraj Pandya's JAX/SciML workshop content
 
 ### Performance Configuration
 - **Recommended settings**: 100 live points, num_delete=50 for workshop timing
-- **Educational progression**: Line fitting → 2D Gaussian → Performance comparison
+- **Core progression**: Line fitting → 2D Gaussian → Performance comparison (20 min)
+- **Advanced extensions**: Custom samplers → JAX ecosystem → SBI methods (90 min)
 - **Error handling**: Proper covariance matrix validation and parameter transforms
+
+### Workshop Structure Options
+- **Short talk**: Core workshop only (20 minutes)
+- **Standard workshop**: Core + 1-2 extensions (50-80 minutes)  
+- **Comprehensive workshop**: All parts (110 minutes)
+- **Research focus**: Core + Part 4 (custom samplers) for methodology
+- **Applied focus**: Core + Parts 5-6 (JAX ecosystem + SBI) for applications
 
 ## Notebook Execution and Display
 
@@ -183,7 +203,12 @@ for cell in notebook['cells']:
 # Create virtual environment with proper dependencies
 python -m venv workshop_env
 source workshop_env/bin/activate
+
+# Core dependencies (Parts 1-3)
 pip install git+https://github.com/handley-lab/blackjax anesthetic tqdm jupyter matplotlib-inline
+
+# Advanced extensions (Parts 4-6)
+pip install optax flax
 ```
 
 ### 🚨 CRITICAL WORKFLOW REMINDER

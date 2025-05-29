@@ -16,38 +16,63 @@
 
 ---
 
-This interactive workshop demonstrates modern nested sampling using BlackJAX, a GPU-native probabilistic programming library built on JAX. Learn how to leverage automatic differentiation and JIT compilation for high-performance Bayesian inference.
+This interactive workshop demonstrates modern nested sampling using BlackJAX, a GPU-native probabilistic programming library built on JAX. The modular design allows flexible delivery from a 20-minute core workshop to a comprehensive 110-minute session covering advanced topics. Learn how to leverage automatic differentiation and JIT compilation for high-performance Bayesian inference.
 
 ## 🎯 Workshop Overview
 
-**Duration:** ~60 minutes  
+**Core Duration:** 20 minutes (suitable for talks)  
+**Full Duration:** 110 minutes (core + extensions)  
 **Format:** Hands-on Jupyter notebook  
 **Platform:** Runnable in Google Colab (no local installation required)
 
 ### What You'll Learn
 
+**Core Workshop (20 minutes):**
 1. **GPU-Native Nested Sampling** with BlackJAX
 2. **JAX Integration** for automatic differentiation and JIT compilation  
 3. **Anesthetic Visualization** for professional nested sampling post-processing
 4. **Performance Comparisons** between different sampling algorithms
-5. **Parameter Transforms** for constrained inference problems
+
+**Advanced Extensions (90 minutes optional):**
+5. **Custom Sampler Development** using BlackJAX's modular components
+6. **JAX Ecosystem Integration** with gradient descent and optimization
+7. **Simulation-Based Inference** with neural posterior estimation
 
 ## 📚 Workshop Content
 
-### Part 1: Linear Regression (15 minutes)
+### 🎯 Core Workshop (20 minutes)
+
+#### Part 1: Linear Regression (5 minutes)
 - Basic nested sampling workflow
 - Evidence computation and uncertainty quantification
 - Posterior visualization with true value overlays
 
-### Part 2: 2D Gaussian Inference (20 minutes)  
+#### Part 2: 2D Gaussian Inference (5 minutes)  
 - Multivariate parameter estimation
 - Correlation coefficient inference with proper transforms
 - Advanced anesthetic plotting techniques
 
-### Part 3: Performance Comparison (20 minutes)
+#### Part 3: Performance Comparison (10 minutes)
 - BlackJAX nested sampling vs. NUTS (Hamiltonian Monte Carlo)
 - Timing benchmarks and sampler trade-offs
 - When to use nested sampling vs. other methods
+
+### 🚀 Advanced Extensions (90 minutes optional)
+
+#### Part 4: Building Custom Nested Samplers (30 minutes)
+- Understanding BlackJAX's modular architecture
+- Implementing custom MCMC kernels and adaptive schemes
+- Research applications and specialized sampling strategies
+
+#### Part 5: JAX Ecosystem Integration (30 minutes)
+- Gradient-based optimization with Optax
+- Image-based inference problems
+- Complementary strengths of different approaches
+
+#### Part 6: Simulation-Based Inference (SBI) (30 minutes)
+- Neural posterior estimation with Flax
+- Amortized inference and training workflows
+- Modern SBI vs. traditional Bayesian methods
 
 ## 🚀 Quick Start
 
@@ -63,9 +88,12 @@ Click the **"View on GitHub"** badge to see the workshop with all plots and outp
 git clone https://github.com/handley-lab/workshop-blackjax-nested-sampling.git
 cd workshop-blackjax-nested-sampling
 
-# Install dependencies
+# Core dependencies (required for Parts 1-3)
 pip install git+https://github.com/handley-lab/blackjax
 pip install anesthetic tqdm matplotlib jupyter
+
+# Advanced extensions (optional for Parts 4-6)
+pip install optax flax
 
 # Launch the notebook (clean version)
 jupyter notebook workshop_nested_sampling.ipynb
@@ -82,11 +110,17 @@ python workshop_nested_sampling.py
 
 ## 🔧 Key Dependencies
 
+### Core Workshop
 - **JAX**: Automatic differentiation and JIT compilation
 - **BlackJAX**: GPU-native MCMC and nested sampling  
 - **Anesthetic**: Nested sampling visualization and analysis
 - **NumPy/SciPy**: Scientific computing foundations
 - **Matplotlib**: Plotting and visualization
+
+### Advanced Extensions (Optional)
+- **Optax**: Gradient-based optimization (Part 5)
+- **Flax**: Neural networks and SBI (Part 6)
+- Additional JAX ecosystem packages
 
 ## 📊 What You'll Build
 
