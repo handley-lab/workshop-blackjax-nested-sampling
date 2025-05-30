@@ -1,233 +1,229 @@
-# CLAUDE.md
+# CLAUDE.md - Workshop Development Template
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when developing educational workshops and tutorials.
 
-## Project Overview
+## Workshop Development Best Practices
 
-This repository contains materials for a workshop on nested sampling in BlackJAX, part of the SBI Galaxy Evolution 2025 conference. The project structure includes:
+### Recommended Workflow
 
-- **Workshop materials** (`prompt-materials/`) from related SBI, JAX, and machine learning workshops
-- **Talk preparation** materials for a 1-hour session (15-minute talk + 45-minute hands-on workshop)
-- **Target deliverable**: A Jupyter notebook workshop runnable in Google Colab
+1. **Start with a Python Script** (`workshop_name.py`)
+   - Develop the complete workshop as a flat Python script first
+   - Use appropriate comment syntax for py2nb conversion (see below)
+   - Test all code blocks end-to-end before notebook conversion
+   - This allows for easier debugging and iterative development
 
-## Architecture
+2. **Convert to Notebook** using `py2nb`
+   - Use the enhanced py2nb script to convert script to notebook
+   - Use `--execute` option to create both clean and executed versions
+   - Maintains proper cell structure and metadata
 
-### Core Focus Areas
+3. **Post-process Notebooks**
+   - Validate notebook JSON structure
+   - Ensure proper execution counts and cell metadata
+   - Test notebook execution in target environments (Jupyter, Colab)
 
-1. **BlackJAX Nested Sampling**: GPU-native nested sampling implementation
-2. **JAX Integration**: Leveraging automatic differentiation and JIT compilation
-3. **Simulation-Based Inference (SBI)**: Modern Bayesian inference techniques
-4. **Educational Workshop Design**: Hands-on learning with minimal setup friction
+### Comment Syntax for py2nb
 
-### Key Dependencies & Frameworks
+```python
+#| # Title - Markdown Header
+#| This creates a markdown cell with content
+#| 
+#| - Bullet points work
+#| - Math: $E = mc^2$
 
-**Core Workshop:**
-- **JAX**: Primary computational framework (autodiff + JIT compilation)
-- **BlackJAX**: MCMC and nested sampling library
-- **Anesthetic**: Visualization library for nested sampling results
-- **NumPy/SciPy**: Core scientific computing
+# Regular Python code goes here
+import numpy as np
+
+#- # This starts a new code cell
+
+more_code = "in new cell"
+
+#! # This creates a command cell (new syntax)
+#! pip install package_name
+#! pip install another_package
+
+# Continue with regular code
+```
+
+**Note**: The `#!` command syntax supports any shell commands, not just pip installs. This provides flexibility for workshop setup, data downloads, system configuration, and more.
+
+### File Structure for Workshops
+
+```
+workshop_name/
+├── CLAUDE.md                          # Project-specific instructions
+├── workshop_name.py                   # Main script (development)
+├── workshop_name.ipynb                # Clean interactive notebook  
+├── workshop_name_executed.ipynb       # Pre-executed with outputs (py2nb --execute)
+├── README.md                          # User documentation
+└── prompt-materials/                  # Reference materials
+    ├── dependency_docs/
+    ├── example_notebooks/
+    └── reference_implementations/
+```
+
+## Educational Workshop Architecture
+
+### Core Design Principles
+
+1. **Modular Structure**: Break content into logical parts (15-20 min each)
+2. **Progressive Complexity**: Start simple, build to advanced concepts
+3. **Executable Examples**: Every concept demonstrated with working code
+4. **Multiple Delivery Modes**: Support different time allocations
+5. **Platform Compatibility**: Work in Jupyter, Colab, and local environments
+
+### Dependency Management
+
+- **Core Dependencies**: Install minimal requirements at start
+- **Advanced Dependencies**: Install when needed using `#!` command syntax
+- **Platform Compatibility**: Prefer packages available in Colab
+- **Version Pinning**: Specify versions for reproducibility when needed
+
+### Content Organization
+
+```python
+#| # Workshop Title
+#| 
+#| Brief description and learning objectives
+#| 
+#| 📖 **Essential Reading**: Link to authoritative references
+
+#! pip install core_dependency1 core_dependency2
+
+import core_dependency1
+import standard_libraries
+
+#| ## Part 1: Core Concepts (20 minutes)
+#| Essential material that everyone should complete
+
+# Core implementation here
+
+#| ## Part 2: Intermediate Applications (30 minutes) 
+#| Building on Part 1 with real examples
+
+# More code here
+
+#- # New cell for complex example
+
+example_code()
+
+#| ## Part 3: Advanced Extensions (Optional - 30+ minutes)
+#| Research-level techniques and integrations
+
+#! pip install advanced_dependency
+
+# Advanced implementations
+```
+
+## Key Dependencies & Frameworks
+
+### Scientific Computing Stack
+- **JAX**: Automatic differentiation and JIT compilation
+- **NumPy/SciPy**: Core scientific computing foundations
 - **Matplotlib**: Plotting and visualization
-- **Jupyter**: Interactive notebook environment
 
-**Advanced Extensions (Optional):**
-- **Optax**: Gradient-based optimization library (Part 5)
-- **Flax**: Neural networks for SBI (Part 6)
-- Additional JAX ecosystem packages
+### Specialized Libraries (Install When Needed)
+- **Optax**: Gradient-based optimization (`#!` command before Part 5)
+- **Flax**: Neural networks (`#!` command before Part 6)
+- **Domain-specific packages**: Install in relevant sections
 
-### Workshop Content Structure
+## Validation and Testing
 
-**Talk Component** (~5 slides, 10-15 minutes):
-- Position nested sampling as essential for most SBI methods (except NPE)
-- Contrast BlackJAX (GPU-native, open-source) with legacy implementations
-- Emphasize JAX's dual strengths: autodiff + JIT compilation
+### Pre-Deployment Checklist
 
-**Core Workshop** (20 minutes):
-- Part 1: Line fitting with nested sampling (5 min)
-- Part 2: 2D Gaussian parameter inference (5 min)
-- Part 3: Performance comparison with NUTS (10 min)
+1. **Script Development**:
+   - [ ] All code blocks execute successfully
+   - [ ] Examples produce expected outputs
+   - [ ] Error handling for common issues
+   - [ ] Timing estimates for each section
 
-**Advanced Extensions** (90 minutes optional):
-- Part 4: Custom nested sampler implementation (30 min)
-- Part 5: JAX ecosystem integration with gradient descent (30 min)
-- Part 6: Simulation-based inference with neural networks (30 min)
+2. **Notebook Conversion**:
+   - [ ] py2nb conversion successful
+   - [ ] JSON validation passes
+   - [ ] All cells have proper metadata
+   - [ ] Install blocks in correct locations
 
-## Development Commands
+3. **Platform Testing**:
+   - [ ] Jupyter Notebook execution
+   - [ ] Google Colab compatibility  
+   - [ ] Dependency installation works
+   - [ ] All outputs render correctly
 
-### Jupyter Notebooks
-```bash
-# Launch Jupyter for workshop development
-jupyter notebook
+4. **Documentation**:
+   - [ ] README with clear instructions
+   - [ ] Learning objectives stated
+   - [ ] Time estimates provided
+   - [ ] Prerequisites listed
 
-# For Google Colab compatibility, ensure notebooks use:
-# !pip install blackjax anesthetic
-```
+## Common Patterns
 
-### LaTeX Presentations
-```bash
-# Build presentation materials
-pdflatex will_handley.tex
-bibtex will_handley
-pdflatex will_handley.tex
-pdflatex will_handley.tex
-```
-
-### JAX Configuration
+### Command Blocks
 ```python
-# Standard JAX setup for notebooks
-import jax
-jax.config.update("jax_enable_x64", True)  # Higher precision
-jax.config.update('jax_num_cpu_devices', 8)  # Multi-core
+#! # Core Dependencies (Workshop Start)
+#! pip install main_package
+#! pip install visualization_package
+
+#! # Advanced Dependencies (Part N)
+#! pip install advanced_package
 ```
 
-## Key Implementation Patterns
-
-### BlackJAX Nested Sampling Workflow
-1. Define likelihood function (JAX-compatible)
-2. Specify prior distribution
-3. Configure nested sampling algorithm
-4. Run sampling with JIT compilation
-5. Visualize results with Anesthetic
-
-### Educational Notebook Structure
-- **Setup**: Minimal pip installs for Colab compatibility
-- **Theory**: Brief conceptual introduction
-- **Practice**: Hands-on coding exercises
-- **Comparison**: Performance benchmarking against alternatives
-- **Extension**: Encourage experimentation with user data
-
-## Reference Materials
-
-### Primary Documentation
-- **BlackJAX repository**: https://github.com/handley-lab/blackjax
-- **Anesthetic documentation**: https://anesthetic.readthedocs.io/en/latest/plotting.html
-- **JAX documentation**: https://jax.readthedocs.io/
-
-### Workshop-Specific Materials
-- **`prompt-materials/blackjax/`**: BlackJAX examples and patterns
-  - `line.py`: Reference implementation for line fitting with proper anesthetic integration
-  - `docs/examples/nested_sampling.py`: Advanced nested sampling examples
-- **`prompt-materials/anesthetic/`**: Anesthetic library documentation and examples
-  - `docs/source/plotting.rst`: Comprehensive plotting guide
-  - `anesthetic/examples/perfect_ns.py`: Perfect nested sampling generators
-  - `tests/test_examples.py`: Usage examples and API patterns
-- **Previous talks** (in `prompt-materials/talks/`): Source material for adapted content
-- **Workshop context** (in `prompt-materials/`): SBI, JAX, and ILI reference materials
-
-### Key API Patterns Learned
-- **NestedSamples class**: Proper post-processing of BlackJAX results
-- **Evidence computation**: `samples.logZ()` and `samples.logZ(nsamples).std()`
-- **Anesthetic plotting**: `plot_2d()` with kinds parameter for visualization
-- **Transform functions**: Proper arctanh/tanh transforms for constrained parameters
-
-## Workshop Development Notes
-
-- Target audience: Researchers familiar with JAX and SBI concepts
-- Delivery platform: Google Colab (minimize installation friction)
-- Flexible duration: 20 minutes (core) to 110 minutes (full)
-- Modular structure: Core concepts + optional advanced extensions
-- Key comparison: BlackJAX nested sampling vs. existing tools (dynesty, emcee)
-- Integration opportunity: Build on Viraj Pandya's JAX/SciML workshop content
-
-### Performance Configuration
-- **Recommended settings**: 100 live points, num_delete=50 for workshop timing
-- **Core progression**: Line fitting → 2D Gaussian → Performance comparison (20 min)
-- **Advanced extensions**: Custom samplers → JAX ecosystem → SBI methods (90 min)
-- **Error handling**: Proper covariance matrix validation and parameter transforms
-
-### Workshop Structure Options
-- **Short talk**: Core workshop only (20 minutes)
-- **Standard workshop**: Core + 1-2 extensions (50-80 minutes)  
-- **Comprehensive workshop**: All parts (110 minutes)
-- **Research focus**: Core + Part 4 (custom samplers) for methodology
-- **Applied focus**: Core + Parts 5-6 (JAX ecosystem + SBI) for applications
-
-## Notebook Execution and Display
-
-### Critical Learnings for GitHub Display
-
-**Essential Requirements:**
-- All code cells MUST have `execution_count` fields (required by GitHub's notebook renderer)
-- All cells MUST have unique `id` fields to prevent validation warnings
-- For embedded plots, use `matplotlib_inline.backend_inline` backend (not `Agg`)
-
-**Execution Process:**
-```bash
-# 1. Install handley-lab BlackJAX (has nested sampling functionality)
-pip install git+https://github.com/handley-lab/blackjax
-
-# 2. Execute with proper matplotlib backend for inline display
-MPLBACKEND=module://matplotlib_inline.backend_inline jupyter nbconvert --to notebook --execute --inplace notebook.ipynb
-```
-
-**Key Matplotlib Configuration:**
+### Progress Indicators
 ```python
-# In notebook cells - essential for proper plot embedding
-%matplotlib inline
-plt.style.use('default')  # Ensure consistent styling
+#| ### Step N.M: Descriptive Title
+#| 
+#| Brief explanation of what this step accomplishes
+#| and why it's important for the overall workflow.
+
+# Implementation here
+print("✓ Step completed successfully!")
 ```
 
-### Common Pitfalls and Solutions
-
-**Problem**: Plots don't embed in executed notebook
-- **Cause**: Using `MPLBACKEND=Agg` which saves to memory but doesn't display inline
-- **Solution**: Use `matplotlib_inline.backend_inline` backend
-
-**Problem**: "Invalid Notebook 'execution_count' is a required property" error
-- **Cause**: Missing execution_count fields in code cells
-- **Solution**: Run notebook validation fix script to add required metadata
-
-**Problem**: Split visualization cells show empty plots
-- **Cause**: Figure creation and plotting commands in separate cells
-- **Solution**: Combine all related plotting code in single cells
-
-### Validation Fix Script Pattern
+### Educational Scaffolding
 ```python
-import json
-import uuid
+#| 🎯 **Learning Objective**: By the end of this section, you will understand...
+#| 
+#| 📋 **Prerequisites**: This section assumes familiarity with...
+#| 
+#| ⏱️ **Estimated Time**: 15-20 minutes
 
-# Add execution_count and cell IDs
-with open('notebook.ipynb', 'r') as f:
-    notebook = json.load(f)
-
-execution_count = 1
-for cell in notebook['cells']:
-    if 'id' not in cell:
-        cell['id'] = str(uuid.uuid4())[:8]
-    if cell['cell_type'] == 'code':
-        cell['execution_count'] = execution_count
-        execution_count += 1
+# Teaching code here with extensive comments
 ```
 
-### Execution Environment Setup
-```bash
-# Create virtual environment with proper dependencies
-python -m venv workshop_env
-source workshop_env/bin/activate
+## Anti-Patterns to Avoid
 
-# Core dependencies (Parts 1-3)
-pip install git+https://github.com/handley-lab/blackjax anesthetic tqdm jupyter matplotlib-inline
+1. **Monolithic Code Blocks**: Break large implementations into digestible pieces
+2. **Missing Installation Blocks**: Always specify when dependencies are needed
+3. **Untested Examples**: Every code block should be verified to work
+4. **Platform-Specific Code**: Avoid assumptions about local vs. cloud environments
+5. **Missing Learning Context**: Always explain why each step matters
 
-# Advanced extensions (Parts 4-6)
-pip install optax flax
-```
+## Success Metrics
 
-### 🚨 CRITICAL WORKFLOW REMINDER
+A successful workshop should:
+- Execute completely in target environments (Jupyter, Colab)
+- Provide clear learning progression from basic to advanced
+- Include sufficient explanation for self-guided learning
+- Offer modular sections for different time constraints
+- Demonstrate best practices in the domain
+- Include proper attribution and references
 
-**EVERY TIME you update the workshop content, you MUST maintain both notebook versions:**
+## Troubleshooting Common Issues
 
-1. **Edit the Python script** (`workshop_nested_sampling.py`) as the source of truth
-2. **Update the clean notebook** using py2nb conversion OR manual editing
-3. **ALWAYS ensure the clean notebook has**:
-   - Executable `!pip install` cell as the second cell
-   - Helpful installation note explaining Colab timing
-   - `%matplotlib inline` configuration in imports
-   - Combined plotting cells (no split figure creation/plotting)
-4. **Re-execute the executed notebook** for GitHub preview
-5. **Fix execution_count fields** using the fix script
-6. **Test both versions** before committing
+### Notebook Validation Errors
+- Ensure markdown cells don't have `outputs` fields
+- Check that `execution_count` is properly set (null for markdown, int/null for code)
+- Validate JSON structure with `python -c "import json; json.load(open('notebook.ipynb'))"`
 
-**Helper Scripts Available**:
-- `fix_notebook_complete.py` - Adds execution_count and cell IDs
-- `execute_notebook.py` - Executes notebook with proper matplotlib backend
+### Dependency Issues
+- Test installations in fresh environments
+- Use `#!` command blocks to install dependencies when needed
+- Provide fallback instructions for manual installation
 
-**Failure to maintain both versions breaks the user experience!**
+### Platform Compatibility
+- Test in both Jupyter and Colab environments
+- Avoid file system dependencies that don't work in cloud environments
+- Provide alternative data sources when needed
+
+---
+
+**Workshop Development**: Generated with [Claude Code](https://claude.ai/code) • **Template Version**: 1.0

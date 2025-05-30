@@ -1,5 +1,8 @@
-# Workshop development materials (not for public repository)
-prompt-materials/
+# Development materials (organized under development/)
+development/reference-materials/
+development/scripts/
+test_env/
+workshop_env/
 
 # Python
 __pycache__/

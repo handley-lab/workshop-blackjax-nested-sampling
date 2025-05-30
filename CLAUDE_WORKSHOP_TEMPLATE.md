@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when developing educ
 
 2. **Convert to Notebook** using `py2nb`
    - Use the enhanced py2nb script to convert script to notebook
-   - Creates both clean interactive and executed versions
+   - Use `--execute` option to create both clean and executed versions
    - Maintains proper cell structure and metadata
 
 3. **Post-process Notebooks**
@@ -54,7 +54,7 @@ workshop_name/
 ├── CLAUDE.md                          # Project-specific instructions
 ├── workshop_name.py                   # Main script (development)
 ├── workshop_name.ipynb                # Clean interactive notebook  
-├── workshop_name_executed.ipynb       # Pre-executed with outputs
+├── workshop_name_executed.ipynb       # Pre-executed with outputs (py2nb --execute)
 ├── README.md                          # User documentation
 └── prompt-materials/                  # Reference materials
     ├── dependency_docs/

@@ -22,6 +22,23 @@
 
 This interactive workshop demonstrates modern nested sampling using BlackJAX, a GPU-native probabilistic programming library built on JAX. The modular design allows flexible delivery from a 20-minute core workshop to a comprehensive 110-minute session covering advanced topics. Learn how to leverage automatic differentiation and JIT compilation for high-performance Bayesian inference.
 
+## 📁 Repository Structure
+
+```
+workshop-blackjax-nested-sampling/
+├── workshop_nested_sampling.py          # Source script (development)
+├── workshop_nested_sampling.ipynb       # Clean interactive notebook
+├── workshop_nested_sampling_executed.ipynb  # Pre-executed with outputs
+├── CLAUDE.md                            # Claude development guidance
+├── CLAUDE_WORKSHOP_TEMPLATE.md          # Workshop development template
+├── README.md                            # This file
+└── development/                         # Development materials
+    ├── docs/                           # Development documentation
+    ├── history/                        # Development conversation logs
+    ├── reference-materials/            # Source materials and examples
+    └── scripts/                        # Helper scripts and utilities
+```
+
 ## 🎯 Workshop Overview
 
 **Core Duration:** 20 minutes (suitable for talks)  
