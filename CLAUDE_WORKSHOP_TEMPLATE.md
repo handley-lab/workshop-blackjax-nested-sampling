@@ -38,12 +38,14 @@ import numpy as np
 
 more_code = "in new cell"
 
-#! # This creates a pip install cell (new syntax)
+#! # This creates a command cell (new syntax)
 #! pip install package_name
 #! pip install another_package
 
 # Continue with regular code
 ```
+
+**Note**: The `#!` command syntax supports any shell commands, not just pip installs. This provides flexibility for workshop setup, data downloads, system configuration, and more.
 
 ### File Structure for Workshops
 
@@ -73,7 +75,7 @@ workshop_name/
 ### Dependency Management
 
 - **Core Dependencies**: Install minimal requirements at start
-- **Advanced Dependencies**: Install when needed using `#!` syntax
+- **Advanced Dependencies**: Install when needed using `#!` command syntax
 - **Platform Compatibility**: Prefer packages available in Colab
 - **Version Pinning**: Specify versions for reproducibility when needed
 
@@ -121,8 +123,8 @@ example_code()
 - **Matplotlib**: Plotting and visualization
 
 ### Specialized Libraries (Install When Needed)
-- **Optax**: Gradient-based optimization (`#!` install before Part 5)
-- **Flax**: Neural networks (`#!` install before Part 6)
+- **Optax**: Gradient-based optimization (`#!` command before Part 5)
+- **Flax**: Neural networks (`#!` command before Part 6)
 - **Domain-specific packages**: Install in relevant sections
 
 ## Validation and Testing
@@ -155,7 +157,7 @@ example_code()
 
 ## Common Patterns
 
-### Installation Blocks
+### Command Blocks
 ```python
 #! # Core Dependencies (Workshop Start)
 #! pip install main_package
@@ -214,7 +216,7 @@ A successful workshop should:
 
 ### Dependency Issues
 - Test installations in fresh environments
-- Use `#!` blocks to install dependencies when needed
+- Use `#!` command blocks to install dependencies when needed
 - Provide fallback instructions for manual installation
 
 ### Platform Compatibility
