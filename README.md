@@ -110,7 +110,7 @@ git clone https://github.com/handley-lab/workshop-blackjax-nested-sampling.git
 cd workshop-blackjax-nested-sampling
 
 # Core dependencies (required for Parts 1-3)
-pip install git+https://github.com/handley-lab/blackjax
+pip install "blackjax @ git+https://github.com/blackjax-devs/blackjax.git@main"
 pip install anesthetic tqdm matplotlib jupyter
 
 # Advanced extensions (optional for Parts 4-6)
@@ -178,8 +178,8 @@ The workshop generates several publication-ready visualizations:
 ## 🔗 Related Resources
 
 ### BlackJAX Documentation
-- **Main Repository**: [handley-lab/blackjax](https://github.com/handley-lab/blackjax)
-- **Nested Sampling Branch**: Focus on the `nested_sampling` branch for latest features
+- **Main Repository**: [blackjax-devs/blackjax](https://github.com/blackjax-devs/blackjax) — nested sampling is now merged into `main` (`blackjax.ns`, `blackjax.nss`, `blackjax.nsswig`)
+- **Documentation**: [blackjax.readthedocs.io](https://blackjax.readthedocs.io/)
 
 ### Anesthetic Documentation  
 - **Documentation**: [anesthetic.readthedocs.io](https://anesthetic.readthedocs.io/en/latest/plotting.html)
