@@ -4,7 +4,7 @@
 # ------------------------------------------------
 # | ## Installation for Google Colab
 # |```bash
-# | pip install git+https://github.com/handley-lab/blackjax@nested_sampling
+# | pip install "blackjax @ git+https://github.com/blackjax-devs/blackjax.git@main"
 # | pip install anesthetic tqdm
 # |```
 
@@ -100,7 +100,7 @@ live = init_fn(particles)
 dead = []
 
 with tqdm.tqdm(desc="Dead points", unit=" dead points") as pbar:
-    while not live.logZ_live - live.logZ < -3:  # Convergence criterion
+    while not live.integrator.logZ_live - live.integrator.logZ < -3:  # Convergence criterion
         rng_key, subkey = jax.random.split(rng_key, 2)
         live, dead_info = step_fn(subkey, live)
         dead.append(dead_info)
@@ -112,12 +112,12 @@ ns_time = time.time() - ns_start
 # | ### 1.8 Process Results with Anesthetic
 columns = ["m", "c", "sigma"]
 labels = [r"$m$", r"$c$", r"$\sigma$"]
-data = jnp.vstack([dead.particles[key] for key in columns]).T
+data = jnp.vstack([dead.particles.position[key] for key in columns]).T
 
 line_samples = NestedSamples(
     data,
-    logL=dead.loglikelihood,
-    logL_birth=dead.loglikelihood_birth,
+    logL=dead.particles.loglikelihood,
+    logL_birth=dead.particles.loglikelihood_birth,
     columns=columns,
     labels=labels,
     logzero=jnp.nan,
@@ -233,7 +233,7 @@ live_2d = init_fn_2d(particles_2d)
 dead_2d = []
 
 with tqdm.tqdm(desc="Dead points", unit=" dead points") as pbar:
-    while not live_2d.logZ_live - live_2d.logZ < -3:
+    while not live_2d.integrator.logZ_live - live_2d.integrator.logZ < -3:
         rng_key, subkey = jax.random.split(rng_key, 2)
         live_2d, dead_info_2d = step_fn_2d(subkey, live_2d)
         dead_2d.append(dead_info_2d)
@@ -244,12 +244,12 @@ dead_2d = blackjax.ns.utils.finalise(live_2d, dead_2d)
 # | ### 2.7 Transform Back and Analyze Results
 columns_2d = ["mu1", "mu2", "sigma1", "sigma2", "rho_t"]
 labels_2d = [r"$\mu_1$", r"$\mu_2$", r"$\sigma_1$", r"$\sigma_2$", r"$\rho_t$"]
-data_2d = jnp.vstack([dead_2d.particles[key] for key in columns_2d]).T
+data_2d = jnp.vstack([dead_2d.particles.position[key] for key in columns_2d]).T
 
 gaussian_samples = NestedSamples(
     data_2d,
-    logL=dead_2d.loglikelihood,
-    logL_birth=dead_2d.loglikelihood_birth,
+    logL=dead_2d.particles.loglikelihood,
+    logL_birth=dead_2d.particles.loglikelihood_birth,
     columns=columns_2d,
     labels=labels_2d,
     logzero=jnp.nan,
@@ -377,118 +377,78 @@ plt.suptitle("Posterior Comparison: Nested Sampling vs NUTS", y=1.02)
 
 # | ## Part 4: Building Your Own Nested Sampler
 # |
-# | Advanced users can build custom nested samplers using BlackJAX's low-level components.
-# | This demonstrates the modular design and shows how nested sampling works under the hood.
+# | Nested sampling in BlackJAX is *modular*. The outer loop is fixed — delete the
+# | lowest-likelihood live points, replenish them from within the current
+# | likelihood contour, and advance the evidence integral — and you customise
+# | *how a replacement particle is generated* through two hooks on
+# | `blackjax.ns.nss.as_top_level_api`:
+# |
+# | - **`proposal`**: a factory that builds the constrained slice move. The default
+# |   `covariance_proposal` steps along a hit-and-run direction shaped by the
+# |   live-point covariance.
+# | - **`inner_kernel_params`**: recomputes that move's parameters from the live
+# |   points at each step. The default `live_covariance` returns their covariance.
+# |
+# | Below we write a deliberately simple sampler to expose the seam: an **isotropic**
+# | hit-and-run move that steps along a random direction scaled by a *single* global
+# | width (the mean per-axis spread of the live points), ignoring correlations. The
+# | built-in `blackjax.nss` (full covariance) and `blackjax.nsswig` (per-axis
+# | slice-within-Gibbs) are the production-grade choices.
 
-from functools import partial
-from blackjax.ns.adaptive import build_kernel, init
-from blackjax.ns.base import new_state_and_info, delete_fn
-from blackjax.ns.utils import repeat_kernel, finalise
-from blackjax.mcmc.random_walk import build_rmh, RWState
-from blackjax import SamplingAlgorithm
+import jax.flatten_util
+from blackjax.ns import nss
+from blackjax.ns.utils import finalise
+from blackjax.smc.tuning.from_particles import particles_stds
 
-# | ### 4.1 Define Custom Nested MCMC Algorithm
-def custom_nsmcmc(
-    logprior_fn,
-    loglikelihood_fn,
-    num_delete=10,
-    num_inner_steps=10,
-):
-    """
-    Build a custom nested sampling MCMC algorithm from low-level components.
-    
-    This demonstrates how to construct a nested sampler using BlackJAX's
-    modular infrastructure - useful for research and customization.
-    
-    Parameters
-    ----------
-    logprior_fn : callable
-        Function that computes the log prior probability of the parameters.
-    loglikelihood_fn : callable
-        Function that computes the log likelihood of the parameters.
-    num_delete : int
-        Number of particles to delete at each step.
-    num_inner_steps : int
-        Number of inner MCMC steps to perform.
-    
-    Returns
-    -------
-    SamplingAlgorithm
-        Custom nested sampling algorithm with init and step functions.
-    """
-    
-    # Build the MCMC kernel for exploring within likelihood constraints
-    mcmc_kernel = build_rmh()
+# | ### 4.1 A custom isotropic slice proposal
+# |
+# | A `proposal` is a factory `(init_state_fn, loglikelihood_0, **params) ->
+# | proposal_generator`. It mirrors `covariance_proposal`, but replaces the
+# | covariance-shaped direction with a random unit direction of length `scale`.
+# | The inner `slice_fn` builds the candidate particle and gates it on the hard
+# | likelihood constraint `loglikelihood > loglikelihood_0`, so the slice shrinks
+# | until it lands inside the current likelihood contour.
+def isotropic_proposal(init_state_fn, loglikelihood_0, scale):
+    """Slice proposal along a random isotropic direction of length `scale`."""
+    def proposal_generator(rng_key, position, logdensity_fn):
+        del logdensity_fn  # NS gates on the recorded loglikelihood, not logdensity
+        flat, unravel_fn = jax.flatten_util.ravel_pytree(position)
+        direction = jax.random.normal(rng_key, flat.shape)
+        direction = scale * direction / jnp.linalg.norm(direction)  # unit dir * scale
 
-    @repeat_kernel(num_inner_steps)
-    def inner_kernel(rng_key, state, logprior_fn, loglikelihood_fn, loglikelihood_0, params):
-        """Inner MCMC kernel that explores within likelihood constraint."""
-        def proposal_distribution(rng_key, position):
-            # Handle dictionary position structure
-            if isinstance(position, dict):
-                step = {}
-                for key in position.keys():
-                    sigma_val = params['sigma'][key] if isinstance(params['sigma'], dict) else params['sigma']
-                    step[key] = sigma_val * jax.random.normal(rng_key, shape=position[key].shape)
-                    rng_key, _ = jax.random.split(rng_key)  # Split key for each parameter
-                return {key: position[key] + step[key] for key in position.keys()}
-            else:
-                # Fallback for array position
-                step = params['sigma'] * jax.random.normal(rng_key, shape=position.shape) 
-                return position + step
+        def slice_fn(t):
+            x = jax.tree.map(lambda p, d: p + t * d, position, unravel_fn(direction))
+            new_state = init_state_fn(x, loglikelihood_birth=loglikelihood_0)
+            return new_state, new_state.loglikelihood > loglikelihood_0
 
-        # Convert to MCMC state format
-        mcmc_state = RWState(position=state.position, logdensity=state.logprior)
-        new_mcmc_state, mcmc_info = mcmc_kernel(rng_key, mcmc_state, logprior_fn, proposal_distribution)
+        return slice_fn
 
-        # Evaluate likelihood at new position
-        loglikelihood = loglikelihood_fn(new_mcmc_state.position)
+    return proposal_generator
 
-        # Create new nested sampling state
-        new_state, info = new_state_and_info(
-            position=new_mcmc_state.position,
-            logprior=new_mcmc_state.logdensity,
-            loglikelihood=loglikelihood,
-            info=mcmc_info,
-        )
+# | ### 4.2 A custom parameter-adaptation hook
+# |
+# | The counterpart of `live_covariance`/`live_widths`, with signature
+# | `(rng_key, state, info, params) -> params`. Here we collapse the per-axis
+# | live-point spread to a single scalar `scale`; the returned dict is splatted
+# | into `isotropic_proposal(init_state_fn, loglikelihood_0, **params)`.
+def live_scale(rng_key, state, info, params=None):
+    """Inner-kernel parameters from the live points: one isotropic `scale`."""
+    return {"scale": jnp.mean(particles_stds(state.particles.position))}
 
-        # Accept only if likelihood exceeds threshold (key constraint!)
-        new_state = jax.lax.cond(
-            loglikelihood > loglikelihood_0,
-            lambda _: new_state,
-            lambda _: state,
-            operand=None,
-        )
-
-        return new_state, info
-
-    def update_inner_kernel_params_fn(state, info, params):
-        """Adapt step size based on current particle distribution."""
-        # Calculate standard deviation for each parameter
-        sigma_dict = {}
-        for key in state.particles.keys():
-            sigma_dict[key] = jnp.std(state.particles[key])
-        return {'sigma': sigma_dict}
-
-    # Build the full nested sampling kernel
-    _delete_fn = partial(delete_fn, num_delete=num_delete)
-
-    step_fn = build_kernel(
+# | ### 4.3 Assemble the custom sampler
+# |
+# | Wiring the two hooks into `as_top_level_api` yields a standard
+# | `SamplingAlgorithm` with the usual `init`/`step` interface.
+def custom_nsmcmc(logprior_fn, loglikelihood_fn, num_delete=10, num_inner_steps=10):
+    """A custom nested sampler wired through the `as_top_level_api` seams."""
+    return nss.as_top_level_api(
         logprior_fn,
         loglikelihood_fn,
-        _delete_fn,
-        inner_kernel,
-        update_inner_kernel_params_fn,
+        num_inner_steps=num_inner_steps,
+        num_delete=num_delete,
+        proposal=isotropic_proposal,
+        inner_kernel_params=live_scale,
     )
-
-    init_fn = partial(
-        init,
-        logprior_fn=logprior_fn,
-        loglikelihood_fn=loglikelihood_fn,
-        update_inner_kernel_params_fn=update_inner_kernel_params_fn,
-    )
-
-    return SamplingAlgorithm(init_fn, step_fn)
 
 # | ### 4.2 Test Custom Sampler on Simple 2D Problem
 print("Testing custom nested sampler on 2D Gaussian problem...")
@@ -541,7 +501,7 @@ custom_live = custom_init_fn(particles_custom)
 custom_dead = []
 
 with tqdm.tqdm(desc="Dead points (custom)", unit=" dead points") as pbar:
-    while not custom_live.logZ_live - custom_live.logZ < -3:
+    while not custom_live.integrator.logZ_live - custom_live.integrator.logZ < -3:
         rng_key, subkey = jax.random.split(rng_key, 2)
         custom_live, custom_dead_info = custom_step_fn(subkey, custom_live)
         custom_dead.append(custom_dead_info)
@@ -553,12 +513,12 @@ custom_time = time.time() - custom_start
 # | ### 4.4 Process Custom Sampler Results
 columns_custom = ["mu1", "mu2", "sigma1", "sigma2"]
 labels_custom = [r"$\mu_1$", r"$\mu_2$", r"$\sigma_1$", r"$\sigma_2$"]
-data_custom = jnp.vstack([custom_dead.particles[key] for key in columns_custom]).T
+data_custom = jnp.vstack([custom_dead.particles.position[key] for key in columns_custom]).T
 
 custom_samples = NestedSamples(
     data_custom,
-    logL=custom_dead.loglikelihood,
-    logL_birth=custom_dead.loglikelihood_birth,
+    logL=custom_dead.particles.loglikelihood,
+    logL_birth=custom_dead.particles.loglikelihood_birth,
     columns=columns_custom,
     labels=labels_custom,
     logzero=jnp.nan,
@@ -589,7 +549,7 @@ standard_live = standard_init_fn(particles_standard)
 standard_dead = []
 
 with tqdm.tqdm(desc="Dead points (standard)", unit=" dead points") as pbar:
-    while not standard_live.logZ_live - standard_live.logZ < -3:
+    while not standard_live.integrator.logZ_live - standard_live.integrator.logZ < -3:
         rng_key, subkey = jax.random.split(rng_key, 2)
         standard_live, standard_dead_info = standard_step_fn(subkey, standard_live)
         standard_dead.append(standard_dead_info)
@@ -598,11 +558,11 @@ with tqdm.tqdm(desc="Dead points (standard)", unit=" dead points") as pbar:
 standard_dead = blackjax.ns.utils.finalise(standard_live, standard_dead)
 standard_time = time.time() - standard_start
 
-data_standard = jnp.vstack([standard_dead.particles[key] for key in columns_custom]).T
+data_standard = jnp.vstack([standard_dead.particles.position[key] for key in columns_custom]).T
 standard_samples = NestedSamples(
     data_standard,
-    logL=standard_dead.loglikelihood,
-    logL_birth=standard_dead.loglikelihood_birth,
+    logL=standard_dead.particles.loglikelihood,
+    logL_birth=standard_dead.particles.loglikelihood_birth,
     columns=columns_custom,
     labels=labels_custom,
     logzero=jnp.nan,
@@ -808,7 +768,7 @@ live_image = init_fn_image(particles_image)
 dead_image = []
 
 with tqdm.tqdm(desc="Dead points (image)", unit=" dead points") as pbar:
-    while not live_image.logZ_live - live_image.logZ < -3:
+    while not live_image.integrator.logZ_live - live_image.integrator.logZ < -3:
         rng_key, subkey = jax.random.split(rng_key, 2)
         live_image, dead_info_image = step_fn_image(subkey, live_image)
         dead_image.append(dead_info_image)
@@ -820,12 +780,12 @@ ns_image_time = time.time() - ns_image_start
 # | ### 5.7 Process Image Inference Results
 columns_image = ['mu_x', 'mu_y', 'sigma_x', 'sigma_y', 'rho']
 labels_image = [r'$\mu_x$', r'$\mu_y$', r'$\sigma_x$', r'$\sigma_y$', r'$\rho$']
-data_image = jnp.vstack([dead_image.particles[key] for key in columns_image]).T
+data_image = jnp.vstack([dead_image.particles.position[key] for key in columns_image]).T
 
 image_samples = NestedSamples(
     data_image,
-    logL=dead_image.loglikelihood,
-    logL_birth=dead_image.loglikelihood_birth,
+    logL=dead_image.particles.loglikelihood,
+    logL_birth=dead_image.particles.loglikelihood_birth,
     columns=columns_image,
     labels=labels_image,
     logzero=jnp.nan,
@@ -1063,7 +1023,7 @@ for i in range(3):  # Compare on 3 test cases
     
     # Get posterior mean from nested sampling
     dead_test = blackjax.ns.utils.finalise(live_test, dead_test)
-    data_test = jnp.vstack([dead_test.particles[key] for key in columns_image]).T
+    data_test = jnp.vstack([dead_test.particles.position[key] for key in columns_image]).T
     ns_mean = jnp.mean(data_test, axis=0)
     
     comparison_results.append({
